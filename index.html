@@ -11,7 +11,7 @@
     document.getElementById("feedback-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const feedback = document.getElementById("feedback").value;
-      await fetch("https://your-n8n-instance.com/webhook/feedback", {
+      await fetch("https://archith-pixel.app.n8n.cloud/webhook/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ feedback })
