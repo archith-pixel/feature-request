@@ -1,26 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <title>Feedback-Driven Site</title>
-</head>
+<head><title>Feedback</title></head>
 <body>
-  <h1>Welcome to Our Site</h1>
+  <h1>Submit Feedback</h1>
   <form id="feedback-form">
-    <label>Feedback:</label><br>
-    <textarea id="feedback" required></textarea><br>
-    <button type="submit">Submit</button>
+    <textarea id="feedback" placeholder="Describe your desired feature or fix..."></textarea>
+    <button type="submit">Send</button>
   </form>
-
   <script>
-    document.getElementById("feedback-form").addEventListener("submit", async function (e) {
+    document.getElementById("feedback-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const feedback = document.getElementById("feedback").value;
-      await fetch("https://your-n8n-endpoint.com/webhook", {
+      await fetch("https://your-n8n-instance.com/webhook/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ feedback })
       });
-      alert("Feedback sent!");
+      alert("Feedback submitted!");
     });
   </script>
 </body>
