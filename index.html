@@ -45,7 +45,7 @@
   <script>
     async function submitFeature() {
       const feature = document.getElementById("feature").value;
-      const res = await fetch("https://YOUR_N8N_DOMAIN/webhook/feature-request", {
+      const res = await fetch("https://archith-pixel.app.n8n.cloud/webhook/feature-request-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ feature }),
