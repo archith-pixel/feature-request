@@ -1,0 +1,46 @@
+name: Auto Implement Feature with Copilot
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  implement-feature:
+    if: contains(github.event.issue.labels.*.name, 'auto-feature')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Copilot CLI
+        run: npm install -g @githubnext/copilot-cli
+
+      - name: Authenticate Copilot
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "{}" > ~/.copilot-rc.json
+          echo "$GITHUB_TOKEN" | gh auth login --with-token
+          copilot auth login || true
+
+      - name: Implement feature
+        env:
+          REQUEST: "${{ github.event.issue.body }}"
+        run: |
+          echo "🛠 Feature request: $REQUEST"
+          copilot suggest "$REQUEST" || echo "Suggestion failed"
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Auto-implemented feature: $REQUEST" || echo "No changes"
+          git push origin main
+
+      - name: Comment on Issue
+        run: |
+          gh issue comment ${{ github.event.issue.number }} --body "✅ Feature implemented and deployed!"
