@@ -1,46 +1,44 @@
-name: Auto Implement Feature with Copilot
+name: Auto Feature Bot
 
 on:
-  issues:
-    types: [opened]
+  schedule:
+    - cron: '*/30 * * * *'  # Runs every 30 mins
+  workflow_dispatch:
 
 jobs:
-  implement-feature:
-    if: contains(github.event.issue.labels.*.name, 'auto-feature')
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
 
-      - name: Install Copilot CLI
-        run: npm install -g @githubnext/copilot-cli
+    - name: Install Copilot CLI
+      run: npm install -g @githubnext/copilot-cli
 
-      - name: Authenticate Copilot
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "{}" > ~/.copilot-rc.json
-          echo "$GITHUB_TOKEN" | gh auth login --with-token
-          copilot auth login || true
+    - name: Login to Copilot
+      run: echo "${{ secrets.COPILOT_AUTH }}" > ~/.copilot-auth && copilot auth login --token ${{ secrets.COPILOT_AUTH }}
 
-      - name: Implement feature
-        env:
-          REQUEST: "${{ github.event.issue.body }}"
-        run: |
-          echo "🛠 Feature request: $REQUEST"
-          copilot suggest "$REQUEST" || echo "Suggestion failed"
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add .
-          git commit -m "Auto-implemented feature: $REQUEST" || echo "No changes"
-          git push origin main
+    - name: Generate Feature from Request
+      run: |
+        FEATURE=$(head -n 1 feature-requests.txt)
+        echo "Generating feature: $FEATURE"
+        copilot suggest "$FEATURE"
+        git config user.name "AI Bot"
+        git config user.email "bot@example.com"
+        git add .
+        git commit -m "Implemented: $FEATURE" || echo "No changes"
+        git push
 
-      - name: Comment on Issue
-        run: |
-          gh issue comment ${{ github.event.issue.number }} --body "✅ Feature implemented and deployed!"
+    - name: Clear Processed Request
+      run: |
+        tail -n +2 feature-requests.txt > temp && mv temp feature-requests.txt
+        git add feature-requests.txt
+        git commit -m "Processed one request"
+        git push
+
